@@ -1,942 +1,492 @@
-
-html_fixed = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📐 المكتسبات القبلية في الرياضيات – بكالوريا 2027</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Cairo', 'Tajawal', sans-serif;
-            background: linear-gradient(145deg, #0a0e1a 0%, #0f1a2e 50%, #0a0e1a 100%);
-            color: #e8edf5;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        /* الخلفية المتحركة */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 20% 50%, rgba(0, 180, 216, 0.06) 0%, transparent 50%);
-            animation: rotate 60s linear infinite;
-        }
-
-        .bg-animation::after {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 80% 50%, rgba(247, 201, 72, 0.06) 0%, transparent 50%);
-            animation: rotate-reverse 50s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes rotate-reverse {
-            from { transform: rotate(360deg); }
-            to { transform: rotate(0deg); }
-        }
-
-        /* جسيمات */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            background: rgba(0, 180, 216, 0.15);
-            border-radius: 50%;
-            animation: float 20s infinite ease-in-out;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 0.4; }
-            90% { opacity: 0.4; }
-            100% { transform: translateY(-300px) translateX(120px); opacity: 0; }
-        }
-
-        /* الحاوية الرئيسية */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(10, 14, 26, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 48px;
-            padding: 30px 30px 40px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        /* الهيدر */
-        .header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 25px;
-            border-bottom: 2px solid rgba(247, 201, 72, 0.12);
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            right: 0;
-            width: 120px;
-            height: 2px;
-            background: linear-gradient(90deg, #f7c948, #f5a623);
-            border-radius: 4px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            flex-wrap: wrap;
-        }
-
-        .header-icon {
-            font-size: 2.5rem;
-            color: #f7c948;
-            background: rgba(247, 201, 72, 0.06);
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(247, 201, 72, 0.08);
-        }
-
-        .header-title h1 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #f7c948, #f5a623);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-        }
-
-        .header-title .sub {
-            font-size: 0.95rem;
-            color: #8892b0;
-            font-weight: 400;
-        }
-
-        .header-title .sub i {
-            color: #f7c948;
-        }
-
-        .header-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(247, 201, 72, 0.03);
-            padding: 8px 18px;
-            border-radius: 60px;
-            border: 1px solid rgba(247, 201, 72, 0.04);
-        }
-
-        .header-badge i {
-            color: #f7c948;
-            font-size: 1.1rem;
-        }
-
-        .header-badge .badge-text {
-            color: #a8b5d9;
-            font-size: 0.8rem;
-        }
-
-        .header-badge .badge-text strong {
-            color: #f7c948;
-        }
-
-        /* شريط الأدوات */
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px 18px 14px;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            margin-bottom: 20px;
-        }
-
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .toolbar-center {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .toolbar-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-pdf {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            color: #8892b0;
-            width: 40px;
-            height: 40px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
-        }
-
-        .btn-pdf:hover {
-            background: rgba(247, 201, 72, 0.04);
-            border-color: rgba(247, 201, 72, 0.08);
-            color: #f7c948;
-            transform: translateY(-1px);
-        }
-
-        .btn-pdf:active {
-            transform: scale(0.94);
-        }
-
-        .btn-pdf.primary {
-            background: rgba(247, 201, 72, 0.04);
-            border-color: rgba(247, 201, 72, 0.06);
-            color: #f7c948;
-        }
-
-        .btn-pdf.primary:hover {
-            background: rgba(247, 201, 72, 0.08);
-        }
-
-        .page-input {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            border-radius: 8px;
-            color: #e8edf5;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.85rem;
-            text-align: center;
-            width: 44px;
-            padding: 6px 4px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .page-input:focus {
-            border-color: rgba(247, 201, 72, 0.1);
-        }
-
-        .page-sep {
-            color: #3f4a66;
-            font-size: 0.8rem;
-        }
-
-        .page-total {
-            color: #8892b0;
-            font-size: 0.8rem;
-        }
-
-        .zoom-display {
-            color: #f7c948;
-            font-size: 0.8rem;
-            font-weight: 600;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        /* عارض PDF */
-        .pdf-wrapper {
-            position: relative;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.3);
-            min-height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pdf-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            padding: 24px;
-            min-height: 550px;
-        }
-
-        /* ======== WRAPPER PAGE + CANVAS + TEXTLAYER ======== */
-        .pdf-page-wrapper {
-            position: relative;
-            display: inline-block;
-            margin: 0 auto;
-            line-height: 0;
-        }
-
-        .pdf-page-wrapper canvas {
-            display: block;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            background: #ffffff;
-            transition: all 0.3s ease;
-            image-rendering: auto;
-            -webkit-image-rendering: auto;
-        }
-
-        /* TextLayer — rendu natif du texte arabe */
-        .textLayer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow: hidden;
-            opacity: 1;
-            line-height: 1;
-            text-align: initial;
-            pointer-events: none;
-            direction: rtl;
-            z-index: 2;
-        }
-
-        .textLayer span,
-        .textLayer br {
-            color: transparent;
-            position: absolute;
-            white-space: pre;
-            cursor: text;
-            transform-origin: 0% 0%;
-            pointer-events: auto;
-            font-family: 'Cairo', 'Tajawal', 'Arial', sans-serif !important;
-        }
-
-        .textLayer span::selection {
-            background: rgba(0, 180, 216, 0.35) !important;
-            color: transparent;
-        }
-
-        .textLayer ::selection {
-            background: rgba(0, 180, 216, 0.35);
-        }
-
-        /* Amélioration spécifique pour l'arabe dans le textLayer */
-        .textLayer span {
-            unicode-bidi: bidi-override;
-            direction: rtl;
-        }
-
-        .pdf-loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            padding: 60px 20px;
-            color: #8892b0;
-        }
-
-        .pdf-loader .spinner {
-            width: 44px;
-            height: 44px;
-            border: 3px solid rgba(247, 201, 72, 0.04);
-            border-top: 3px solid #f7c948;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .pdf-loader i {
-            font-size: 2.8rem;
-            color: rgba(247, 201, 72, 0.1);
-        }
-
-        .pdf-loader p {
-            font-size: 0.9rem;
-            opacity: 0.5;
-        }
-
-        .pdf-error {
-            text-align: center;
-            color: #f7c948;
-            padding: 30px;
-            max-width: 450px;
-        }
-
-        .pdf-error i {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 18px;
-            opacity: 0.4;
-        }
-
-        .pdf-error h3 {
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-        }
-
-        .pdf-error p {
-            font-size: 0.9rem;
-            opacity: 0.5;
-        }
-
-        /* الفوتر */
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.02);
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            font-size: 0.8rem;
-            color: #3f4a66;
-        }
-
-        .footer i {
-            color: #f7c948;
-        }
-
-        .footer .love {
-            color: #f7c948;
-            animation: pulse 2s infinite;
-            display: inline-block;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* تحسينات للموبايل */
-        @media (max-width: 768px) {
-            .container {
-                padding: 16px;
-                border-radius: 28px;
-            }
-
-            .header-title h1 {
-                font-size: 1.3rem;
-            }
-
-            .header-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.8rem;
-            }
-
-            .header-badge {
-                padding: 4px 12px;
-                font-size: 0.7rem;
-            }
-
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-            }
-
-            .toolbar-left {
-                justify-content: center;
-            }
-
-            .toolbar-center {
-                justify-content: center;
-            }
-
-            .toolbar-right {
-                justify-content: center;
-            }
-
-            .pdf-container {
-                padding: 12px;
-                min-height: 350px;
-            }
-
-            .footer {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .btn-pdf {
-                width: 36px;
-                height: 36px;
-                font-size: 0.8rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-title h1 {
-                font-size: 1rem;
-            }
-            .page-input {
-                width: 38px;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(247, 201, 72, 0.15);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(247, 201, 72, 0.25);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📐 المكتسبات القبلية – رياضيات 2027</title>
+  <!-- Font Awesome 6 (أيقونات) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ---------- إعادة تعيين و أنماط عامة ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f5efe8 0%, #e6dbd0 100%);
+      font-family: 'Segoe UI', 'Tahoma', 'Helvetica Neue', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.8rem 1.2rem;
+    }
+
+    /* الحاوية الرئيسية (بطاقة الكتاب) */
+    .book-wrapper {
+      max-width: 1100px;
+      width: 100%;
+      background: #fefcf9;
+      border-radius: 48px 48px 32px 32px;
+      box-shadow: 0 30px 60px -15px rgba(40, 30, 20, 0.35), 0 0 0 1px rgba(200, 175, 150, 0.25);
+      padding: 2rem 2rem 1.6rem;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(2px);
+    }
+
+    /* ----- الرأس ----- */
+    .book-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.6rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 3px dashed #d6c6b6;
+    }
+
+    .book-title {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.8rem;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #2f241c;
+      letter-spacing: -0.3px;
+    }
+
+    .book-title i {
+      color: #a67c5c;
+      font-size: 2.2rem;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.08));
+    }
+
+    .book-title .badge-year {
+      background: #dacabc;
+      padding: 0.1rem 1rem;
+      border-radius: 60px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #412f23;
+      margin-right: 0.3rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: #efe6dc;
+      border: 1px solid #d6c6b6;
+      padding: 0.6rem 1.4rem;
+      border-radius: 60px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #2f241c;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
+      text-decoration: none;
+    }
+
+    .btn i {
+      color: #7a5f4a;
+      font-size: 1.1rem;
+    }
+
+    .btn-primary {
+      background: #2f241c;
+      border-color: #2f241c;
+      color: #fcf6ef;
+      box-shadow: 0 10px 16px -8px rgba(47, 36, 28, 0.4);
+    }
+
+    .btn-primary i {
+      color: #ecdccc;
+    }
+
+    .btn-primary:hover {
+      background: #1f1712;
+      transform: scale(1.02);
+      border-color: #1f1712;
+      box-shadow: 0 12px 20px -10px #1f1712b0;
+    }
+
+    .btn-outline:hover {
+      background: #d6c6b6;
+      border-color: #b7a392;
+    }
+
+    /* ----- مربع الأساسيات (النقاط) ----- */
+    .basics-box {
+      background: #f7f1ea;
+      border-radius: 30px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.8rem;
+      border-right: 6px solid #a67c5c;
+      box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.6), 0 6px 14px rgba(60, 40, 28, 0.08);
+    }
+
+    .basics-box .pre-title {
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: #3d2e23;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .basics-box .pre-title i {
+      color: #a67c5c;
+      font-size: 1.3rem;
+    }
+
+    .basics-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 2rem;
+      align-items: center;
+    }
+
+    .basics-grid .item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.08rem;
+      background: #fffbf7;
+      padding: 0.3rem 1.1rem 0.3rem 0.9rem;
+      border-radius: 60px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      border: 1px solid #e6dace;
+    }
+
+    .basics-grid .item i {
+      color: #a67c5c;
+      font-size: 1.2rem;
+      width: 1.8rem;
+      text-align: center;
+    }
+
+    .basics-grid .item strong {
+      font-weight: 700;
+      color: #2f241c;
+      margin-left: 0.2rem;
+    }
+
+    .basics-grid .item .desc {
+      color: #4d3b2e;
+      font-weight: 400;
+    }
+
+    /* ----- حاوية PDF ----- */
+    .pdf-container {
+      background: #e6dad0;
+      border-radius: 28px;
+      padding: 0.8rem;
+      box-shadow: inset 0 6px 12px rgba(0,0,0,0.06), 0 14px 30px -12px #2f241c80;
+      transition: 0.25s;
+    }
+
+    .pdf-embed {
+      width: 100%;
+      height: 72vh;
+      min-height: 440px;
+      border-radius: 22px;
+      border: 2px solid #f2ebe2;
+      background: #fefcf9;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      transition: 0.2s;
+    }
+
+    /* ----- التذييل ----- */
+    .book-footer {
+      margin-top: 1.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      color: #5f4d3d;
+      font-size: 0.95rem;
+      padding-top: 0.6rem;
+      border-top: 2px dotted #d6c6b6;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #4d3b2e;
+      text-decoration: none;
+      transition: 0.2s;
+      font-weight: 500;
+      border-bottom: 1px solid transparent;
+    }
+
+    .footer-links a:hover {
+      color: #1f1712;
+      border-bottom: 1px solid #a67c5c;
+    }
+
+    .badge-github {
+      background: #2d241d;
+      color: #efe6dc;
+      padding: 0.3rem 1.2rem;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge-github i {
+      color: #dccfc0;
+    }
+
+    /* ----- استجابة للشاشات الصغيرة ----- */
+    @media (max-width: 800px) {
+      .book-wrapper {
+        padding: 1.2rem;
+        border-radius: 32px;
+      }
+      .book-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+      }
+      .book-title {
+        font-size: 1.7rem;
+        justify-content: center;
+      }
+      .action-buttons {
+        justify-content: center;
+      }
+      .basics-box {
+        padding: 1rem 1.2rem;
+      }
+      .basics-grid .item {
+        font-size: 0.98rem;
+        padding: 0.2rem 0.9rem 0.2rem 0.7rem;
+      }
+      .pdf-embed {
+        height: 56vh;
+        min-height: 320px;
+      }
+      .book-footer {
+        flex-direction: column;
+        gap: 0.8rem;
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .book-title {
+        font-size: 1.4rem;
+      }
+      .btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+      }
+      .basics-grid .item {
+        font-size: 0.9rem;
+        padding: 0.1rem 0.6rem 0.1rem 0.5rem;
+      }
+      .basics-grid .item i {
+        width: 1.4rem;
+        font-size: 1rem;
+      }
+      .pdf-embed {
+        height: 46vh;
+        min-height: 240px;
+      }
+    }
+
+    /* تأثير hover على الـ PDF */
+    .pdf-container:hover {
+      box-shadow: inset 0 6px 12px rgba(0,0,0,0.04), 0 18px 34px -12px #2f241c90;
+    }
+
+    /* رسالة بديلة في حال تعذر العرض */
+    .pdf-fallback {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-<div class="bg-animation"></div>
-<div class="particles" id="particles"></div>
+<div class="book-wrapper">
 
-<div class="container">
-
-    <!-- ========== HEADER ========== -->
-    <header class="header">
-        <div class="header-left">
-            <div class="header-icon"><i class="fas fa-calculator"></i></div>
-            <div class="header-title">
-                <h1>📐 المكتسبات القبلية في الرياضيات</h1>
-                <div class="sub">
-                    <i class="fas fa-user-graduate"></i>
-                    بكالوريا 2027
-                    <span style="color:#3f4a66;margin:0 8px;">•</span>
-                    <i class="fas fa-pen-fancy"></i>
-                    الأستاذ: بن الدين بويعقوب
-                </div>
-            </div>
-        </div>
-        <div class="header-badge">
-            <i class="fas fa-book-open"></i>
-            <span class="badge-text"><strong>PDF</strong> · قراءة مباشرة</span>
-        </div>
-    </header>
-
-    <!-- ========== TOOLBAR ========== -->
-    <div class="toolbar">
-        <div class="toolbar-left">
-            <button class="btn-pdf" id="prevPage" title="الصفحة السابقة">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <span class="page-sep">/</span>
-            <span class="page-total" id="totalPages">0</span>
-            <button class="btn-pdf" id="nextPage" title="الصفحة التالية">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <input class="page-input" id="pageInput" type="number" value="1" min="1">
-        </div>
-
-        <div class="toolbar-center">
-            <button class="btn-pdf primary" id="zoomIn" title="تكبير">
-                <i class="fas fa-search-plus"></i>
-            </button>
-            <span class="zoom-display" id="zoomDisplay">100%</span>
-            <button class="btn-pdf primary" id="zoomOut" title="تصغير">
-                <i class="fas fa-search-minus"></i>
-            </button>
-            <button class="btn-pdf primary" id="zoomFit" title="ملاءمة">
-                <i class="fas fa-compress-arrows-alt"></i>
-            </button>
-        </div>
-
-        <div class="toolbar-right">
-            <button class="btn-pdf primary" id="fullscreenBtn" title="ملء الشاشة">
-                <i class="fas fa-expand" id="fsIcon"></i>
-            </button>
-        </div>
+  <!-- رأس الصفحة مع العنوان الكامل -->
+  <header class="book-header">
+    <div class="book-title">
+      <i class="fas fa-ruler-triangle"></i>
+      <span>المكتسبات القبلية في الرياضيات</span>
+      <span class="badge-year"><i class="far fa-calendar-alt"></i> باك 2027</span>
     </div>
-
-    <!-- ========== PDF VIEWER ========== -->
-    <div class="pdf-wrapper">
-        <div class="pdf-container" id="pdfContainer">
-            <div class="pdf-loader" id="pdfLoader">
-                <div class="spinner"></div>
-                <i class="fas fa-file-pdf"></i>
-                <p>جاري تحميل الكتاب ...</p>
-            </div>
-        </div>
+    <div class="action-buttons">
+      <!-- زر التحميل المباشر -->
+      <a href="maktasabat.pdf" download="maktasabat.pdf" class="btn btn-primary">
+        <i class="fas fa-download"></i> تحميل PDF
+      </a>
+      <!-- عرض في نافذة جديدة -->
+      <a href="maktasabat.pdf" target="_blank" class="btn btn-outline">
+        <i class="fas fa-external-link-alt"></i> عرض منفصل
+      </a>
     </div>
+  </header>
 
-    <!-- ========== FOOTER ========== -->
-    <footer class="footer">
-        <div>
-            <i class="fas fa-copyright"></i> 2026 · بن الدين بويعقوب
-            <span style="margin:0 10px;color:#2a3050;">|</span>
-            <i class="fas fa-gem" style="color:#f7c948;"></i>
-            دليل المكتسبات القبلية – بكالوريا 2027
-        </div>
-        <div>
-            <i class="fas fa-code"></i>
-            <span class="love">❤</span> تصميم تفاعلي
-        </div>
-    </footer>
+  <!-- مربع النقاط الأساسية (كما هو مطلوب) -->
+  <div class="basics-box">
+    <div class="pre-title">
+      <i class="fas fa-check-circle"></i> 
+      <span>📌 قبل أن تبدأ مراجعة الرياضيات، تأكد من إتقان هذه الأساسيات:</span>
+    </div>
+    <div class="basics-grid">
+      <span class="item">
+        <i class="fas fa-utensils"></i>
+        <strong>الكسور:</strong> <span class="desc">جمع، طرح، ضرب، قسمة، تبسيط</span>
+      </span>
+      <span class="item">
+        <i class="fas fa-bolt"></i>
+        <strong>القوى:</strong> <span class="desc">قواعد الضرب والقسمة، القوى السالبة، الترميز العلمي</span>
+      </span>
+      <span class="item">
+        <i class="fas fa-square-root-alt"></i>
+        <strong>الجذور التربيعية:</strong> <span class="desc">تبسيط، عمليات، ترشيح المقام</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- حاوية عرض PDF -->
+  <div class="pdf-container">
+    <embed 
+      src="maktasabat.pdf" 
+      type="application/pdf" 
+      class="pdf-embed" 
+      id="pdfViewer"
+      aria-label="دليل المكتسبات القبلية – رياضيات 2027">
+    <!-- رسالة بديلة للمتصفحات التي لا تدعم الـ embed -->
+    <noscript>
+      <div style="padding: 2rem; text-align: center; background: #f7efe8; border-radius: 20px;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: #a67c5c;"></i>
+        <p style="margin-top: 1rem; font-size: 1.2rem;">متصفحك لا يدعم عرض PDF مباشرة، لكن يمكنك <a href="maktasabat.pdf" download>تحميل الملف</a>.</p>
+      </div>
+    </noscript>
+  </div>
+
+  <!-- التذييل مع روابط GitHub -->
+  <footer class="book-footer">
+    <div class="footer-links">
+      <a href="#" onclick="window.open('https://github.com/your-username/your-repo', '_blank'); return false;">
+        <i class="fab fa-github"></i> GitHub
+      </a>
+      <a href="#" onclick="window.open('https://github.com/your-username/your-repo/blob/main/maktasabat.pdf', '_blank'); return false;">
+        <i class="fas fa-code-branch"></i> المصدر
+      </a>
+      <span><i class="far fa-calendar-alt"></i> 2027 · باك</span>
+    </div>
+    <div class="badge-github">
+      <i class="fas fa-code"></i> 
+      <span>PDF تفاعلي · جاهز للتحميل</span>
+    </div>
+  </footer>
 </div>
 
+<!-- جافا سكريبت خفيف: تحسين تجربة العرض ورسالة بديلة في حال تعذر تحميل PDF -->
 <script>
-// ============================================================
-// الجسيمات
-// ============================================================
-(function() {
-    const container = document.getElementById('particles');
-    const count = 80;
-    for (let i = 0; i < count; i++) {
-        const p = document.createElement('div');
-        p.classList.add('particle');
-        const size = Math.random() * 3 + 1.5;
-        const delay = Math.random() * 25;
-        const duration = 18 + Math.random() * 18;
-        p.style.cssText = `
-            width: ${size}px; height: ${size}px;
-            left: ${Math.random() * 100}%;
-            animation-delay: ${delay}s;
-            animation-duration: ${duration}s;
-        `;
-        container.appendChild(p);
-    }
-})();
+  (function() {
+    "use strict";
 
-// ============================================================
-// PDF.js
-// ============================================================
-const pdfjsLib = window.pdfjsLib;
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdfEmbed = document.getElementById('pdfViewer');
+    let fallbackShown = false;
 
-// ============================================================
-// الإعدادات
-// ============================================================
-const PDF_PATH = "maktasabat.pdf"; // ضع اسم ملفك هنا
-const container = document.getElementById('pdfContainer');
-const loader = document.getElementById('pdfLoader');
+    function showFallback() {
+      if (fallbackShown || !pdfEmbed) return;
+      fallbackShown = true;
+      // إخفاء الـ embed وعرض رسالة بديلة
+      pdfEmbed.style.display = 'none';
+      const container = pdfEmbed.parentNode;
+      // إزالة أي fallback سابق
+      const oldFallback = container.querySelector('.pdf-fallback');
+      if (oldFallback) oldFallback.remove();
 
-// Wrapper pour la page (canvas + textLayer)
-let pageWrapper = document.createElement('div');
-pageWrapper.id = 'pageWrapper';
-pageWrapper.className = 'pdf-page-wrapper';
-pageWrapper.style.display = 'none';
-container.appendChild(pageWrapper);
-
-const canvas = document.createElement('canvas');
-canvas.id = 'pdfCanvas';
-pageWrapper.appendChild(canvas);
-const ctx = canvas.getContext('2d', { alpha: false }); // optimisation perf
-
-const totalPagesSpan = document.getElementById('totalPages');
-const pageInput = document.getElementById('pageInput');
-const zoomDisplay = document.getElementById('zoomDisplay');
-const pdfWrapper = document.querySelector('.pdf-wrapper');
-
-let pdfDoc = null;
-let currentPage = 1;
-let totalPages = 0;
-let scale = 1.2;
-let minScale = 0.6;
-let maxScale = 2.8;
-let rendering = false;
-let textLayerRenderTask = null;
-
-// Ratio HiDPI pour netteté maximale
-const OUTPUT_SCALE = window.devicePixelRatio || 1;
-
-// ============================================================
-// دوال التحكم
-// ============================================================
-function renderPage(num) {
-    if (!pdfDoc || rendering) return;
-    rendering = true;
-    loader.style.display = 'flex';
-    pageWrapper.style.display = 'none';
-
-    pdfDoc.getPage(num).then(page => {
-        const viewport = page.getViewport({ scale: scale });
-
-        // ====== HiDPI : résolution native de l'écran ======
-        canvas.width = viewport.width * OUTPUT_SCALE;
-        canvas.height = viewport.height * OUTPUT_SCALE;
-        canvas.style.width = viewport.width + 'px';
-        canvas.style.height = viewport.height + 'px';
-
-        // Réinitialiser la matrice puis scaler
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.scale(OUTPUT_SCALE, OUTPUT_SCALE);
-
-        const renderContext = {
-            canvasContext: ctx,
-            viewport: viewport,
-            // Amélioration du rendu des polices
-            intent: 'display'
-        };
-
-        const renderTask = page.render(renderContext);
-
-        renderTask.promise.then(() => {
-            pageWrapper.style.display = 'inline-block';
-            loader.style.display = 'none';
-            currentPage = num;
-            pageInput.value = num;
-
-            // ====== TextLayer : texte arabe clair et sélectionnable ======
-            renderTextLayer(page, viewport);
-
-            rendering = false;
-        }).catch(err => {
-            console.error('Render error:', err);
-            showError('تعذر عرض الصفحة ' + num);
-            rendering = false;
-        });
-    }).catch(err => {
-        console.error('Page load error:', err);
-        showError('تعذر تحميل الصفحة ' + num);
-        rendering = false;
-    });
-}
-
-function renderTextLayer(page, viewport) {
-    // Annuler le rendu précédent s'il existe
-    if (textLayerRenderTask) {
-        textLayerRenderTask.cancel();
-        textLayerRenderTask = null;
+      const fallbackDiv = document.createElement('div');
+      fallbackDiv.className = 'pdf-fallback';
+      fallbackDiv.style.cssText = `
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: #f7efe8; border-radius: 22px; padding: 2.5rem 1.5rem;
+        min-height: 260px; text-align: center; border: 2px dashed #b7a392;
+        color: #2f241c; font-family: inherit;
+      `;
+      fallbackDiv.innerHTML = `
+        <i class="fas fa-file-pdf" style="font-size: 3.8rem; color: #a67c5c; margin-bottom: 0.8rem;"></i>
+        <h4 style="font-weight: 600; margin-bottom: 0.4rem;">📄 لم يتم تحميل الملف</h4>
+        <p style="max-width: 360px; margin: 0.3rem auto; color: #4d3b2e;">
+          تأكد من وجود ملف <strong style="background: #ebdacb; padding: 0.1rem 0.8rem; border-radius: 30px;">maktasabat.pdf</strong> 
+          في نفس المجلد، أو حمله يدوياً.
+        </p>
+        <a href="maktasabat.pdf" download class="btn btn-primary" style="margin-top: 1.2rem; background: #2f241c; color: #fcf6ef; border: none;">
+          <i class="fas fa-download"></i> تحميل الملف
+        </a>
+      `;
+      container.appendChild(fallbackDiv);
     }
 
-    // Supprimer l'ancien textLayer
-    const oldLayer = document.getElementById('textLayer');
-    if (oldLayer) oldLayer.remove();
+    // مستمع حدث الخطأ في الـ embed (مدعوم في معظم المتصفحات)
+    if (pdfEmbed) {
+      pdfEmbed.addEventListener('error', function(e) {
+        showFallback();
+      });
 
-    const textLayerDiv = document.createElement('div');
-    textLayerDiv.id = 'textLayer';
-    textLayerDiv.className = 'textLayer';
-    textLayerDiv.style.width = viewport.width + 'px';
-    textLayerDiv.style.height = viewport.height + 'px';
-    pageWrapper.appendChild(textLayerDiv);
+      // في حال نجاح التحميل، نخفي أي fallback سابق
+      pdfEmbed.addEventListener('load', function() {
+        const container = pdfEmbed.parentNode;
+        const fallback = container.querySelector('.pdf-fallback');
+        if (fallback) fallback.remove();
+        pdfEmbed.style.display = 'block';
+        fallbackShown = false;
+      });
 
-    page.getTextContent({
-        includeMarkedContent: false
-    }).then(textContent => {
-        // PDF.js v3.x : utilisation de renderTextLayer
-        if (typeof pdfjsLib.renderTextLayer === 'function') {
-            textLayerRenderTask = pdfjsLib.renderTextLayer({
-                textContentSource: textContent,
-                container: textLayerDiv,
-                viewport: viewport,
-                textDivs: [],
-                isOffscreenCanvasSupported: false
-            });
+      // مهلة احتياطية: إذا لم يظهر المحتوى خلال 7 ثوانٍ (للملفات الكبيرة) نعرض fallback
+      const timer = setTimeout(() => {
+        // نتحقق إن كان الـ embed لا يزال مرئياً لكن لم يظهر محتوى (لا يمكن الجزم)
+        // لكننا نعرض fallback فقط إذا لم يتم اكتشاف load أو error
+        // ولتجنب التداخل نستخدم fallback فقط إذا لم يتم إخفاء الـ embed
+        if (!fallbackShown && pdfEmbed.style.display !== 'none') {
+          // نتحقق من وجود محتوى عبر عرض الـ embed (لكن لا طريقة موثوقة)
+          // نعرض fallback بحذر
+          showFallback();
         }
-    }).catch(err => {
-        console.warn('TextLayer error (non bloquant):', err);
-    });
-}
+        clearTimeout(timer);
+      }, 7000);
 
-function showError(msg) {
-    loader.style.display = 'flex';
-    loader.innerHTML = `
-        <div class="pdf-error">
-            <i class="fas fa-exclamation-circle"></i>
-            <h3>⚠️ ${msg}</h3>
-            <p>يرجى المحاولة مرة أخرى أو التحقق من الملف</p>
-            <button onclick="location.reload();" style="margin-top:18px;background:rgba(247,201,72,0.06);border:1px solid rgba(247,201,72,0.08);color:#f7c948;padding:8px 28px;border-radius:40px;cursor:pointer;font-family:inherit;font-size:0.9rem;">إعادة المحاولة</button>
-        </div>
-    `;
-    pageWrapper.style.display = 'none';
-}
-
-function loadPDF() {
-    loader.style.display = 'flex';
-    loader.innerHTML = `
-        <div class="spinner"></div>
-        <i class="fas fa-file-pdf"></i>
-        <p>جاري تحميل الكتاب ...</p>
-    `;
-    pageWrapper.style.display = 'none';
-
-    pdfjsLib.getDocument({
-        url: PDF_PATH,
-        useSystemFonts: true,              // ✅ Utilise les polices système arabes
-        cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
-        cMapPacked: true,
-        standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/standard_fonts/'
-    }).promise.then(doc => {
-        pdfDoc = doc;
-        totalPages = doc.numPages;
-        totalPagesSpan.textContent = totalPages;
-        pageInput.max = totalPages;
-        renderPage(1);
-    }).catch(err => {
-        console.error('PDF load error:', err);
-        showError('تعذر تحميل الملف');
-    });
-}
-
-function goToPage(num) {
-    if (!pdfDoc) return;
-    if (num < 1) num = 1;
-    if (num > totalPages) num = totalPages;
-    if (num === currentPage && pageWrapper.style.display !== 'none') return;
-    renderPage(num);
-}
-
-function nextPage() {
-    if (currentPage < totalPages) goToPage(currentPage + 1);
-}
-
-function prevPage() {
-    if (currentPage > 1) goToPage(currentPage - 1);
-}
-
-function changeZoom(delta) {
-    let newScale = scale + delta;
-    if (newScale < minScale) newScale = minScale;
-    if (newScale > maxScale) newScale = maxScale;
-    if (newScale === scale) return;
-    scale = newScale;
-    zoomDisplay.textContent = Math.round(scale * 100) + '%';
-    renderPage(currentPage);
-}
-
-function resetZoom() {
-    scale = 1.2;
-    zoomDisplay.textContent = '120%';
-    renderPage(currentPage);
-}
-
-// ============================================================
-// أزرار التحكم
-// ============================================================
-document.getElementById('prevPage').addEventListener('click', prevPage);
-document.getElementById('nextPage').addEventListener('click', nextPage);
-
-pageInput.addEventListener('change', () => {
-    let p = parseInt(pageInput.value);
-    if (isNaN(p) || p < 1) p = 1;
-    if (totalPages > 0 && p > totalPages) p = totalPages;
-    goToPage(p);
-});
-
-document.getElementById('zoomIn').addEventListener('click', () => changeZoom(0.1));
-document.getElementById('zoomOut').addEventListener('click', () => changeZoom(-0.1));
-document.getElementById('zoomFit').addEventListener('click', resetZoom);
-
-// ============================================================
-// ملء الشاشة
-// ============================================================
-document.getElementById('fullscreenBtn').addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen?.() ||
-        document.documentElement.webkitRequestFullscreen?.();
-    } else {
-        document.exitFullscreen?.() ||
-        document.webkitExitFullscreen?.();
+      // على error نلغي المؤقت
+      pdfEmbed.addEventListener('error', function() {
+        clearTimeout(timer);
+      });
+      pdfEmbed.addEventListener('load', function() {
+        clearTimeout(timer);
+      });
     }
-});
 
-document.addEventListener('fullscreenchange', () => {
-    const icon = document.getElementById('fsIcon');
-    if (document.fullscreenElement) {
-        icon.className = 'fas fa-compress';
-    } else {
-        icon.className = 'fas fa-expand';
-    }
-});
-
-// ============================================================
-// اختصارات لوحة المفاتيح
-// ============================================================
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') { prevPage(); e.preventDefault(); }
-    if (e.key === 'ArrowLeft') { nextPage(); e.preventDefault(); }
-    if (e.key === '+' || e.key === '=') { changeZoom(0.1); e.preventDefault(); }
-    if (e.key === '-') { changeZoom(-0.1); e.preventDefault(); }
-    if (e.key === '0') { resetZoom(); e.preventDefault(); }
-});
-
-// ============================================================
-// بدء التحميل
-// ============================================================
-loadPDF();
-
-// ============================================================
-// إعادة التصيير عند تغيير حجم النافذة
-// ============================================================
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        if (pdfDoc && !rendering) renderPage(currentPage);
-    }, 400);
-});
-
-console.log('📐 المكتسبات القبلية في الرياضيات – بكالوريا 2027');
-console.log('👨‍🏫 الأستاذ: بن الدين بويعقوب');
-console.log('✅ HiDPI + TextLayer + SystemFonts activés');
+    console.log('📐 دليل "المكتسبات القبلية – باك 2027" — تأكد من وجود ملف maktasabat.pdf في نفس المجلد.');
+  })();
 </script>
 
+<!-- تنبيه للمطور: يمكن تغيير اسم الملف أو المسار حسب الحاجة -->
 </body>
-</html>'''
+</html>
 
-with open('/mnt/agents/output/maktasabat_fixed.html', 'w', encoding='utf-8') as f:
-    f.write(html_fixed)
-
-print("Fichier sauvegardé avec succès.")
-print("Taille:", len(html_fixed), "caractères")
