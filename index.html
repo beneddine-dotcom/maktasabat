@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+html_fixed = '''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -312,13 +313,64 @@
             min-height: 550px;
         }
 
-        .pdf-container canvas {
-            max-width: 100%;
-            height: auto !important;
+        /* ======== WRAPPER PAGE + CANVAS + TEXTLAYER ======== */
+        .pdf-page-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 0 auto;
+            line-height: 0;
+        }
+
+        .pdf-page-wrapper canvas {
+            display: block;
             border-radius: 12px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
             background: #ffffff;
             transition: all 0.3s ease;
+            image-rendering: auto;
+            -webkit-image-rendering: auto;
+        }
+
+        /* TextLayer — rendu natif du texte arabe */
+        .textLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            opacity: 1;
+            line-height: 1;
+            text-align: initial;
+            pointer-events: none;
+            direction: rtl;
+            z-index: 2;
+        }
+
+        .textLayer span,
+        .textLayer br {
+            color: transparent;
+            position: absolute;
+            white-space: pre;
+            cursor: text;
+            transform-origin: 0% 0%;
+            pointer-events: auto;
+            font-family: 'Cairo', 'Tajawal', 'Arial', sans-serif !important;
+        }
+
+        .textLayer span::selection {
+            background: rgba(0, 180, 216, 0.35) !important;
+            color: transparent;
+        }
+
+        .textLayer ::selection {
+            background: rgba(0, 180, 216, 0.35);
+        }
+
+        /* Amélioration spécifique pour l'arabe dans le textLayer */
+        .textLayer span {
+            unicode-bidi: bidi-override;
+            direction: rtl;
         }
 
         .pdf-loader {
@@ -618,11 +670,17 @@ const PDF_PATH = "maktasabat.pdf"; // ضع اسم ملفك هنا
 const container = document.getElementById('pdfContainer');
 const loader = document.getElementById('pdfLoader');
 
+// Wrapper pour la page (canvas + textLayer)
+let pageWrapper = document.createElement('div');
+pageWrapper.id = 'pageWrapper';
+pageWrapper.className = 'pdf-page-wrapper';
+pageWrapper.style.display = 'none';
+container.appendChild(pageWrapper);
+
 const canvas = document.createElement('canvas');
 canvas.id = 'pdfCanvas';
-canvas.style.display = 'none';
-container.appendChild(canvas);
-const ctx = canvas.getContext('2d');
+pageWrapper.appendChild(canvas);
+const ctx = canvas.getContext('2d', { alpha: false }); // optimisation perf
 
 const totalPagesSpan = document.getElementById('totalPages');
 const pageInput = document.getElementById('pageInput');
@@ -636,6 +694,10 @@ let scale = 1.2;
 let minScale = 0.6;
 let maxScale = 2.8;
 let rendering = false;
+let textLayerRenderTask = null;
+
+// Ratio HiDPI pour netteté maximale
+const OUTPUT_SCALE = window.devicePixelRatio || 1;
 
 // ============================================================
 // دوال التحكم
@@ -644,23 +706,40 @@ function renderPage(num) {
     if (!pdfDoc || rendering) return;
     rendering = true;
     loader.style.display = 'flex';
-    canvas.style.display = 'none';
+    pageWrapper.style.display = 'none';
 
     pdfDoc.getPage(num).then(page => {
         const viewport = page.getViewport({ scale: scale });
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+
+        // ====== HiDPI : résolution native de l'écran ======
+        canvas.width = viewport.width * OUTPUT_SCALE;
+        canvas.height = viewport.height * OUTPUT_SCALE;
+        canvas.style.width = viewport.width + 'px';
+        canvas.style.height = viewport.height + 'px';
+
+        // Réinitialiser la matrice puis scaler
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(OUTPUT_SCALE, OUTPUT_SCALE);
 
         const renderContext = {
             canvasContext: ctx,
-            viewport: viewport
+            viewport: viewport,
+            // Amélioration du rendu des polices
+            intent: 'display'
         };
 
-        page.render(renderContext).promise.then(() => {
-            canvas.style.display = 'block';
+        const renderTask = page.render(renderContext);
+
+        renderTask.promise.then(() => {
+            pageWrapper.style.display = 'inline-block';
             loader.style.display = 'none';
             currentPage = num;
             pageInput.value = num;
+
+            // ====== TextLayer : texte arabe clair et sélectionnable ======
+            renderTextLayer(page, viewport);
+
             rendering = false;
         }).catch(err => {
             console.error('Render error:', err);
@@ -674,6 +753,42 @@ function renderPage(num) {
     });
 }
 
+function renderTextLayer(page, viewport) {
+    // Annuler le rendu précédent s'il existe
+    if (textLayerRenderTask) {
+        textLayerRenderTask.cancel();
+        textLayerRenderTask = null;
+    }
+
+    // Supprimer l'ancien textLayer
+    const oldLayer = document.getElementById('textLayer');
+    if (oldLayer) oldLayer.remove();
+
+    const textLayerDiv = document.createElement('div');
+    textLayerDiv.id = 'textLayer';
+    textLayerDiv.className = 'textLayer';
+    textLayerDiv.style.width = viewport.width + 'px';
+    textLayerDiv.style.height = viewport.height + 'px';
+    pageWrapper.appendChild(textLayerDiv);
+
+    page.getTextContent({
+        includeMarkedContent: false
+    }).then(textContent => {
+        // PDF.js v3.x : utilisation de renderTextLayer
+        if (typeof pdfjsLib.renderTextLayer === 'function') {
+            textLayerRenderTask = pdfjsLib.renderTextLayer({
+                textContentSource: textContent,
+                container: textLayerDiv,
+                viewport: viewport,
+                textDivs: [],
+                isOffscreenCanvasSupported: false
+            });
+        }
+    }).catch(err => {
+        console.warn('TextLayer error (non bloquant):', err);
+    });
+}
+
 function showError(msg) {
     loader.style.display = 'flex';
     loader.innerHTML = `
@@ -684,7 +799,7 @@ function showError(msg) {
             <button onclick="location.reload();" style="margin-top:18px;background:rgba(247,201,72,0.06);border:1px solid rgba(247,201,72,0.08);color:#f7c948;padding:8px 28px;border-radius:40px;cursor:pointer;font-family:inherit;font-size:0.9rem;">إعادة المحاولة</button>
         </div>
     `;
-    canvas.style.display = 'none';
+    pageWrapper.style.display = 'none';
 }
 
 function loadPDF() {
@@ -694,9 +809,15 @@ function loadPDF() {
         <i class="fas fa-file-pdf"></i>
         <p>جاري تحميل الكتاب ...</p>
     `;
-    canvas.style.display = 'none';
+    pageWrapper.style.display = 'none';
 
-    pdfjsLib.getDocument(PDF_PATH).promise.then(doc => {
+    pdfjsLib.getDocument({
+        url: PDF_PATH,
+        useSystemFonts: true,              // ✅ Utilise les polices système arabes
+        cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+        cMapPacked: true,
+        standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/standard_fonts/'
+    }).promise.then(doc => {
         pdfDoc = doc;
         totalPages = doc.numPages;
         totalPagesSpan.textContent = totalPages;
@@ -712,7 +833,7 @@ function goToPage(num) {
     if (!pdfDoc) return;
     if (num < 1) num = 1;
     if (num > totalPages) num = totalPages;
-    if (num === currentPage && canvas.style.display !== 'none') return;
+    if (num === currentPage && pageWrapper.style.display !== 'none') return;
     renderPage(num);
 }
 
@@ -736,7 +857,7 @@ function changeZoom(delta) {
 
 function resetZoom() {
     scale = 1.2;
-    zoomDisplay.textContent = '100%';
+    zoomDisplay.textContent = '120%';
     renderPage(currentPage);
 }
 
@@ -808,7 +929,14 @@ window.addEventListener('resize', () => {
 
 console.log('📐 المكتسبات القبلية في الرياضيات – بكالوريا 2027');
 console.log('👨‍🏫 الأستاذ: بن الدين بويعقوب');
+console.log('✅ HiDPI + TextLayer + SystemFonts activés');
 </script>
 
 </body>
-</html>
+</html>'''
+
+with open('/mnt/agents/output/maktasabat_fixed.html', 'w', encoding='utf-8') as f:
+    f.write(html_fixed)
+
+print("Fichier sauvegardé avec succès.")
+print("Taille:", len(html_fixed), "caractères")
